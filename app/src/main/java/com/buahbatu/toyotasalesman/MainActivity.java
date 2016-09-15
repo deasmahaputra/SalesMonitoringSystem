@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.username_text)EditText userText;
     @BindView(R.id.pass_text)EditText passText;
+    @BindView(R.id.textInfo)TextView info;
 
     @BindView(R.id.login_button) Button loginButton;
     @OnClick(R.id.login_button)void onLoginClick(Button button){
@@ -91,21 +92,22 @@ public class MainActivity extends AppCompatActivity {
         setUI(AppConfig.getLoginStatus(context));
         startTrack(AppConfig.getLoginStatus(context));
 
-        isnetworkAvailable();
+        //isnetworkAvailable();
+        updateWithNewLocation();
 
     }
 
-    private boolean isnetworkAvailable(){
-        String permission = "ACCESS_FINE_LOCATION";
-        int res = context.checkCallingOrSelfPermission(permission);
-        if(res == PackageManager.PERMISSION_GRANTED){
-            LocationManager locationManager;
-            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            updateWithNewLocation(location);
-        }
-        return false;
-    }
+//    private boolean isnetworkAvailable(){
+//        String permission = "ACCESS_FINE_LOCATION";
+//        int res = context.checkCallingOrSelfPermission(permission);
+//        if(res == PackageManager.PERMISSION_GRANTED){
+//            LocationManager locationManager;
+//            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+//            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//            updateWithNewLocation(location);
+//        }
+//        return false;
+   // }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -374,12 +376,22 @@ public class MainActivity extends AppCompatActivity {
 //
 //    };
 
-    private void updateWithNewLocation(Location location){
+    public void updateWithNewLocation(){
+
+        String permission = "ACCESS_FINE_LOCATION";
+        int res = context.checkCallingOrSelfPermission(permission);
+        if(res == PackageManager.PERMISSION_GRANTED){
+            LocationManager locationManager;
+            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+
         String latLongString = "Unknown";
         String addressString = "No address found";
-        TextView textInfo;
+        //TextView textInfo;
         DecimalFormat df = new DecimalFormat("##.00");
-        textInfo = (TextView)findViewById(R.id.textInfo);
+        //textInfo = (TextView)findViewById(R.id.textInfo);
+            //info.setText("Connect");
         if (location != null) {
             double lat = location.getLatitude();
             double lng = location.getLongitude();
@@ -402,8 +414,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("Geocoder IOException exception: ", ioe.getMessage());
             }
         }
-       textInfo .setText("Your Current Position is:\n" + latLongString + "\n" + addressString);
-
+            String tampung = "Your Current Position is:\n" + latLongString + "\n" + addressString;
+            Log.w("tampung" , tampung);
+       info.setText("Your Current Position is:\n" + latLongString + "\n" + addressString);
+        }
     }
 
 }
