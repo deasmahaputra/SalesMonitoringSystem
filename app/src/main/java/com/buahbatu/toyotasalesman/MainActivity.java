@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         } else askForPermission();
 
     }
-    @OnClick(R.id.login_button)void onImageClick(){
+    @OnClick(R.id.logo_view)void onImageClick(){
         new AlertDialog.Builder(context).setTitle("Phone IMEI")
                 .setMessage("Your imei " + AppConfig.getImeiNum(context))
                 .setPositiveButton("Ok got it!", new DialogInterface.OnClickListener() {
@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 && checkCallingOrSelfPermission("android.permission.ACCESS_NETWORK_STATE") == PackageManager.PERMISSION_GRANTED
                 && checkCallingOrSelfPermission("android.permission.INTERNET") == PackageManager.PERMISSION_GRANTED;
     }
-
 
     void askForPermission(){
         ActivityCompat.requestPermissions(this, new String[]{
@@ -411,7 +410,7 @@ public class MainActivity extends AppCompatActivity {
                     addressString = addressString + address.getCountryName()+ "\n";
                 }
             } catch (IOException ioe) {
-                Log.e("Geocoder IOException exception: ", ioe.getMessage());
+                Log.e("Geocoder IOException", ioe.getMessage());
             }
         }
             String tampung = "Your Current Position is:\n" + latLongString + "\n" + addressString;

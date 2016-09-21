@@ -28,7 +28,7 @@ public class NetHelper {
         preferences.edit().putString(domainServer, domain).apply();
     }
 
-    static String getDomainAddress(Context context){
+    public static String getDomainAddress(Context context){
         SharedPreferences preferences = AppConfig.getDefaultPreferences(context);
         return context.getString(R.string.default_protocol)+preferences.getString(domainServer, context.getString(R.string.default_domain));
     }

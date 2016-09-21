@@ -6,10 +6,13 @@
     <!--APP text-->
     <string name="username">User Name</string>
     <string name="password">Password</string>
+    <string name="error_field">Silahkan isi kolom ini</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="location">Coordinate</string>
     <string name="latitude">LAT</string>
     <string name="longitude">LONG</string>
+    <string name="logo_description">Toyota Logo</string>
+    <string name="service_not_enabled">Silahkan berikan izin layanan, Track tidak dapat dimulai</string>
 </resources>

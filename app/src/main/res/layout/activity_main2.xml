@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" android:orientation="vertical"
+    android:background="@drawable/bg">
+    <ImageView
+        android:id="@+id/logo_view"
+        android:contentDescription="@string/logo_description"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/autoo" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.80"
+        android:weightSum="2"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/username_text"
+            android:imeOptions="actionNext"
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="60dp"
+            android:hint="@string/username"
+            android:inputType="textPersonName"
+            android:drawableLeft="@drawable/person"
+            android:drawableStart="@drawable/person"
+            android:drawablePadding="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:background="@android:drawable/editbox_background_normal"/>
+        <EditText
+            android:id="@+id/pass_text"
+            android:imeOptions="actionDone"
+            android:layout_marginTop="8dp"
+            android:layout_width="fill_parent"
+            android:layout_height="60dp"
+            android:hint="@string/password"
+            android:drawableLeft="@drawable/locked"
+            android:drawableStart="@drawable/locked"
+            android:drawablePadding="16dp"
+            android:inputType="textPassword"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:background="@android:drawable/editbox_background_normal"/>
+        <Button
+            android:id="@+id/login_button"
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="60dp"
+            android:background="@color/grey"
+            android:text="@string/login"
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:textColor="@color/White"/>
+    </LinearLayout>
+</LinearLayout>
