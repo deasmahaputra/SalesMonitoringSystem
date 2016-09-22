@@ -27,7 +27,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -219,7 +218,7 @@ public class ReportingService extends Service{
     private LocationRequest createLocationRequest(){
         LocationRequest mLocationRequest = new LocationRequest();
 //        mLocationRequest.setInterval(2000);
-        mLocationRequest.setInterval(getResources().getInteger(R.integer.interval) /*second*/ * 1000 /*millis*/); // in millis
+        mLocationRequest.setInterval(getResources().getInteger(R.integer.INTERVAL) /*second*/ * 1000 /*millis*/); // in millis
         mLocationRequest.setFastestInterval(getResources().getInteger(R.integer.fast_interval) /*second*/ * 1000 /*millis*/); // in millis
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return mLocationRequest;
@@ -271,7 +270,7 @@ public class ReportingService extends Service{
                     }catch (JSONException e){
                         Log.i(TAG, "postEvent error update");
                         e.printStackTrace();
-                        handler.postDelayed(location_updater, getResources().getInteger(R.integer.interval) * 1000 /*millisecond*/);
+                        handler.postDelayed(location_updater, getResources().getInteger(R.integer.INTERVAL) * 1000 /*millisecond*/);
                     }
                 }
             });

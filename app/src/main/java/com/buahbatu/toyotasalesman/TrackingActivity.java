@@ -1,12 +1,6 @@
 package com.buahbatu.toyotasalesman;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,19 +10,15 @@ import android.view.MenuItem;
 
 import com.buahbatu.toyotasalesman.network.NetHelper;
 import com.buahbatu.toyotasalesman.network.ToyotaService;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.maps.CameraUpdate;
+import com.buahbatu.toyotasalesman.services.ReportingService3;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -51,6 +41,10 @@ public class TrackingActivity extends AppCompatActivity {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
         mapFragment.getMapAsync(mapReadyCallback);
+
+        Intent service = new Intent(this, ReportingService3.class);
+        service.putExtra(getString(R.string.service_intent_switch), AppConfig.LOGIN);
+        startService(service);
     }
 
     OnMapReadyCallback mapReadyCallback = new OnMapReadyCallback() {

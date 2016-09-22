@@ -34,6 +34,12 @@
             android:value="AIzaSyCS8Za5B-OzQh1Yj6ROSzrs0vlrWYj8A5w"/>
             <!--android:value="AIzaSyDX7Vcg_tm5w0zCdeiJfTRufghuz3ftVSQ" />-->
         <service
+            android:name=".services.ReportingService3"
+            android:process=":my_process"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/service_name">
+        </service>
+        <service
             android:name=".services.ReportingService"
             android:exported="false" />
         <service
@@ -52,6 +58,7 @@
         </activity>
 
         <activity android:name=".Main2Activity">
+            android:label="@string/app_name"
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
