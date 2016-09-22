@@ -8,6 +8,7 @@
     <string name="password">Password</string>
     <string name="error_field">Silahkan isi kolom ini</string>
     <string name="login">Login</string>
+    <string name="login_process">Login &#8230;</string>
     <string name="logout">Logout</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="location">Coordinate</string>
@@ -15,4 +16,17 @@
     <string name="longitude">LONG</string>
     <string name="logo_description">Toyota Logo</string>
     <string name="service_not_enabled">Silahkan berikan izin layanan, Track tidak dapat dimulai</string>
+    <string name="internet_sudden_error">Check your internet connection</string>
+
+    <!--LOGIN ACTIVITY-->
+    <string name="error_username">Username tidak terdaftar</string>
+    <string name="error_password">Password tidak tepat</string>
+    <string name="error_imei">IMEI hp ini tidak terdaftar</string>
+    <string name="error_time">Anda berada diluar jam kerja</string>
+    <string name="error_version">Silahkan update aplikasi ke versi terbaru</string>
+    <string name="error_solve">OK got it!</string>
+
+    <!--MAP ACTIVITY-->
+    <string name="my_location">Saya berada di</string>
+
 </resources>

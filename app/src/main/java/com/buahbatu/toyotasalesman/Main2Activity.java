@@ -1,11 +1,10 @@
 package com.buahbatu.toyotasalesman;
 
-import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,22 +16,23 @@ import android.widget.Toast;
 import com.buahbatu.toyotasalesman.network.NetHelper;
 import com.buahbatu.toyotasalesman.network.ToyotaService;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class Main2Activity extends AppCompatActivity {
-    private final static int requestPhonePermission = 0;
     private final static String TAG = "MainActivity";
+    private ProgressDialog progressDialog;
 
     @BindView(R.id.username_text) TextView mUserText;
     @BindView(R.id.pass_text) TextView mPassText;
@@ -59,29 +59,86 @@ public class Main2Activity extends AppCompatActivity {
             return;
         }
 
+        Log.i(TAG, "loginOnClick: ");
+        
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(NetHelper.getDomainAddress(this))
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
 
         ToyotaService toyotaService = retrofit.create(ToyotaService.class);
-        toyotaService.login(RequestBody.create(MediaType.parse("text/plain"), AppConfig.getImeiNum(this)),
-                RequestBody.create(MediaType.parse("text/plain"), mUserText.getText().toString()),
-                RequestBody.create(MediaType.parse("text/plain"), mPassText.getText().toString()))
-                .enqueue(stringCallback);
+
+        // caller
+        final Call<ResponseBody> caller = toyotaService.login(AppConfig.getImeiNum(this),
+                mUserText.getText().toString(),
+                mPassText.getText().toString());
+        // async task
+        caller.enqueue(stringCallback);
+
+        progressDialog.setTitle(getString(R.string.login_process));
+        progressDialog.setIndeterminate(true);
+        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                progressDialog.dismiss();
+                caller.cancel();
+            }
+        });
+        progressDialog.show();
     }
 
     Callback<ResponseBody> stringCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             try {
-                Log.d(TAG, "onResponse: "+response.body().string());
-            }catch (IOException e){};
-
+                String responseString = response.body().string();
+                Log.d(TAG, "onResponse: "+responseString);
+                progressDialog.dismiss();
+                String responseKey = NetHelper.getLoginResponse(responseString);
+                AlertDialog alertDialog = new AlertDialog.Builder(Main2Activity.this).create();
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.error_solve), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                boolean isSucces = false;
+                switch(responseKey){
+                    case "success":
+                        isSucces = true;
+                        AppConfig.saveLoginStatus(Main2Activity.this, AppConfig.LOGIN);
+                        AppConfig.storeAccount(Main2Activity.this, mUserText.getText().toString(),
+                                mPassText.getText().toString());
+                        moveToTrackingActivity();
+                        break;
+                    case "username":
+                        alertDialog.setTitle(getString(R.string.error_username));
+                        break;
+                    case "password":
+                        alertDialog.setTitle(getString(R.string.error_password));
+                        break;
+                    case "imei":
+                        alertDialog.setTitle(getString(R.string.error_imei));
+                        break;
+                    case "time":
+                        alertDialog.setTitle(getString(R.string.error_time));
+                        break;
+                    default:
+                        alertDialog.setTitle(getString(R.string.error_time));break;
+                }
+                if (!isSucces)
+                    alertDialog.show();
+            }catch (IOException|JSONException e){
+                Log.e(TAG, "onResponse: ", e);
+            }
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+            Log.d(TAG, "onResponse: "+t.getMessage());
+            progressDialog.dismiss();
+            Toast.makeText(Main2Activity.this, getString(R.string.internet_sudden_error),
+                    Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -90,34 +147,26 @@ public class Main2Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        if (AppConfig.getLoginStatus(this)) {
-            startActivity(new Intent(this, TrackingActivity.class));
-            finish();
-        }else
+        if (AppConfig.getLoginStatus(this))
+            moveToTrackingActivity();
+        else
             ButterKnife.bind(this);
-        if (!checkForPermission())
-            askForPermission();
+
+        if (!AppConfig.checkForPermission(this))
+            AppConfig.askForPermission(this);
+
+        progressDialog = new ProgressDialog(this);
     }
 
-    private boolean checkForPermission(){
-        return checkCallingOrSelfPermission("android.permission.READ_PHONE_STATE") == PackageManager.PERMISSION_GRANTED
-                && checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
-                && checkCallingOrSelfPermission("android.permission.ACCESS_NETWORK_STATE") == PackageManager.PERMISSION_GRANTED
-                && checkCallingOrSelfPermission("android.permission.INTERNET") == PackageManager.PERMISSION_GRANTED;
-    }
-    private void askForPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.INTERNET,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_NETWORK_STATE
-        }, requestPhonePermission);
+    private void moveToTrackingActivity(){
+        startActivity(new Intent(this, TrackingActivity.class));
+        finish();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == requestPhonePermission){
+        if (requestCode == AppConfig.REQUEST_PHONE_PERMISSION){
             for (int result:grantResults) {
                 if (result==PackageManager.PERMISSION_DENIED) {
                     Toast.makeText(this, getString(R.string.service_not_enabled), Toast.LENGTH_SHORT)

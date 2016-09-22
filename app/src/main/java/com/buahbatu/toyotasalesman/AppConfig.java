@@ -1,13 +1,23 @@
 package com.buahbatu.toyotasalesman;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  * This is for configuration in app
  */
 public class AppConfig {
+    public final static int REQUEST_PHONE_PERMISSION = 0;
+
+    public static boolean LOGIN = true;
+    public static boolean LOGOUT = false;
+
     private static String preference = "SMS_pref";
     private static String loginKey = "login";
     private static String onTrackedKey = "bind";
@@ -48,6 +58,24 @@ public class AppConfig {
 
     public static String getUserName(Context context){
         return getDefaultPreferences(context).getString(context.getString(R.string.api_username), "User");
+    }
+
+    public static boolean checkForPermission(Context context){
+        return context.checkCallingOrSelfPermission("android.permission.READ_PHONE_STATE") == PackageManager.PERMISSION_GRANTED
+                && context.checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
+                && context.checkCallingOrSelfPermission("android.permission.ACCESS_NETWORK_STATE") == PackageManager.PERMISSION_GRANTED
+                && context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
+                && context.checkCallingOrSelfPermission("android.permission.INTERNET") == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static void askForPermission(Activity activity){
+        ActivityCompat.requestPermissions(activity, new String[]{
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.INTERNET,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE
+        }, REQUEST_PHONE_PERMISSION);
     }
 
     public static int getLocalAppVersion(Context context){
