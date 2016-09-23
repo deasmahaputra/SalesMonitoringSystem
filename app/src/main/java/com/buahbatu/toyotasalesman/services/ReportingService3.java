@@ -210,7 +210,7 @@ public class ReportingService3 extends Service {
             mGoogleApiClient.disconnect();
             Log.i(TAG, "stopLocationUpdates: after");
             handler.removeCallbacks(location_updater);
-            location_updater.run();
+//            location_updater.run();
         }
     }
 
