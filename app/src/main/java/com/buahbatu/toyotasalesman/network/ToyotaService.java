@@ -21,7 +21,7 @@ public interface ToyotaService {
                              @Part("alamat") String alamat);
 
     @Multipart
-    @POST("inputKoordinate")
+    @POST("inputKoordinat")
     Call<ResponseBody> report(@Part("coor") String coor,
                               @Part("usr") String username,
                               @Part("alamat") String alamat);

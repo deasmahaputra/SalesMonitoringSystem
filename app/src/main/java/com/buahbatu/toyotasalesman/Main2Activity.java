@@ -31,7 +31,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class Main2Activity extends AppCompatActivity {
-    private final static String TAG = "MainActivity";
+    private final static String TAG = "Main2Activity";
     private ProgressDialog progressDialog;
 
     @BindView(R.id.username_text) TextView mUserText;

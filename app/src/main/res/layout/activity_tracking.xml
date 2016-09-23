@@ -27,12 +27,12 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/my_location"
-            android:text="Jl. Gatot subroto"
+            android:text="Loading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/my_coordinate"
-            android:text="143.0123,12.1213"
+            android:text="Loading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>

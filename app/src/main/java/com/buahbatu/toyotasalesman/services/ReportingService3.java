@@ -8,10 +8,13 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.buahbatu.toyotasalesman.AppConfig;
@@ -40,6 +43,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class ReportingService3 extends Service {
     private final String TAG = "ReportingService3";
     private final static int NOTIFICATION_ID = 0;
+
+    public static final String
+            ACTION_LOCATION_BROADCAST = ReportingService3.class.getName(),
+            EXTRA_COORDINATE = "extra_coordinate",
+            EXTRA_ADDRESS = "extra_address";
 
     private Handler handler;
     private LocationRequest mLocationRequest;
@@ -74,25 +82,39 @@ public class ReportingService3 extends Service {
                     e.printStackTrace();
                 }
 
-                Call<ResponseBody> call = toyotaService.report(mLastLocation.getLatitude()+","+mLastLocation.getLongitude(),
+                String coordinate = mLastLocation.getLatitude()+","+mLastLocation.getLongitude();
+                Call<ResponseBody> call = toyotaService.report(coordinate,
                         AppConfig.getUserName(ReportingService3.this), street);
                 call.enqueue(bodyCallback);
+                sendBroadcastMessage(coordinate, street);
 
-//                sendUpdateLocation(isLoggedIn, mLastLocation);
             } else Log.i(TAG, "Permission needed");
         }
     };
+
+    private void sendBroadcastMessage(String coordinate, String address) {
+        Log.i(TAG, "send BROADCAST");
+        Intent intent = new Intent(ACTION_LOCATION_BROADCAST);
+        intent.putExtra(EXTRA_ADDRESS, address);
+        intent.putExtra(EXTRA_COORDINATE, coordinate);
+        sendBroadcast(intent);
+    }
 
     Callback<ResponseBody> bodyCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             try {
-                int nextUpdate = NetHelper.getNextUpdateSchedule(response.body().string()); // in second
-                Log.i(TAG, "next is in " + nextUpdate + " seconds");
-                if (nextUpdate > 60) {
-                    dismissNotification();
-                } else {
-                    showNotification();
+                Log.i(TAG, "onResponse is success: "+response.isSuccessful());
+                int nextUpdate = 60;
+                if (response.isSuccessful()) {
+                    Log.i(TAG, "onResponse code: " + response.errorBody().string());
+                    nextUpdate = NetHelper.getNextUpdateSchedule(response.body().string()); // in second
+                    Log.i(TAG, "next is in " + nextUpdate + " seconds");
+                    if (nextUpdate > 60) {
+                        dismissNotification();
+                    } else {
+                        showNotification();
+                    }
                 }
                 handler.postDelayed(location_updater, nextUpdate * 1000 /*millisecond*/);
             }catch (IOException|JSONException e){
@@ -121,18 +143,40 @@ public class ReportingService3 extends Service {
         handler = new Handler();
         geocoder = new Geocoder(this, Locale.getDefault());
         mLocationRequest = createLocationRequest();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API).addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Log.i(TAG, "onConnectionFailed: ");
-                    }
-                }).build();
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            Log.i(TAG, "onCreate: create client");
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(connectionCallbacks)
+                    .addOnConnectionFailedListener(failedListener)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
         retrofit = new Retrofit.Builder()
                 .baseUrl(NetHelper.getDomainAddress(this))
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
     }
+
+    GoogleApiClient.ConnectionCallbacks connectionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            Log.i(TAG, "onConnected: ");
+            location_updater.run();
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.i(TAG, "onConnectionSuspended: ");
+        }
+    };
+
+    GoogleApiClient.OnConnectionFailedListener failedListener = new GoogleApiClient.OnConnectionFailedListener() {
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+            Log.i(TAG, "onConnectionFailed: ");
+        }
+    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -149,17 +193,21 @@ public class ReportingService3 extends Service {
         return START_STICKY;
     }
 
+
+
     public void startLocationUpdates() {
         Log.i(TAG, "startLocationUpdates: check");
         if (mGoogleApiClient!=null) {
+            mGoogleApiClient.connect();
             Log.i(TAG, "startLocationUpdates: after");
-            location_updater.run();
+
         }
     }
 
     public void stopLocationUpdates() {
         Log.i(TAG, "stopLocationUpdates: check");
         if (mGoogleApiClient!=null) {
+            mGoogleApiClient.disconnect();
             Log.i(TAG, "stopLocationUpdates: after");
             handler.removeCallbacks(location_updater);
             location_updater.run();
@@ -181,13 +229,14 @@ public class ReportingService3 extends Service {
                 .setContentText(this.getString(R.string.tracked))            // the contents of the entry
                 .setContentIntent(contentIntent)      // The intent to send when the entry is clicked
                 .build();
+
         startForeground(NOTIFICATION_ID, notification);
     }
 
     private void dismissNotification(){
         // update UI
         try {
-            stopForeground(true);
+//            stopForeground(true);
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -1,12 +1,17 @@
 package com.buahbatu.toyotasalesman;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.buahbatu.toyotasalesman.network.NetHelper;
 import com.buahbatu.toyotasalesman.network.ToyotaService;
@@ -19,6 +24,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -29,8 +35,29 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class TrackingActivity extends AppCompatActivity {
     private final String TAG = "TrackingActivity";
+    private BroadcastReceiver broadcastReceiver;
+
+    @BindView(R.id.my_coordinate) TextView myCoordinate;
+    @BindView(R.id.my_location) TextView myLocation;
 
     private GoogleMap mMap;
+    private boolean myReceiverIsRegistered;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!myReceiverIsRegistered) {
+            registerReceiver(broadcastReceiver, new IntentFilter(ReportingService3.ACTION_LOCATION_BROADCAST));
+            myReceiverIsRegistered = true;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+        myReceiverIsRegistered = false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +72,21 @@ public class TrackingActivity extends AppCompatActivity {
         Intent service = new Intent(this, ReportingService3.class);
         service.putExtra(getString(R.string.service_intent_switch), AppConfig.LOGIN);
         startService(service);
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+//                String action = intent.getAction();
+//                if(action.equalsIgnoreCase(ReportingService3.ACTION_LOCATION_BROADCAST)){
+                    // send message to activity
+                    Log.i(TAG, "onReceive: BROADCAST");
+                    String address = intent.getStringExtra(ReportingService3.EXTRA_ADDRESS);
+                    String coordinate = intent.getStringExtra(ReportingService3.EXTRA_COORDINATE);
+                    myCoordinate.setText(coordinate);
+                    myLocation.setText(address);
+//                }
+            }
+        };
     }
 
     OnMapReadyCallback mapReadyCallback = new OnMapReadyCallback() {
@@ -59,7 +101,7 @@ public class TrackingActivity extends AppCompatActivity {
             mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
                 @Override
                 public boolean onMyLocationButtonClick() {
-                    if (mMap.getMyLocation()!=null){
+                    if (mMap.getMyLocation() != null){
                         LatLng latLng = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
                     }else
@@ -102,6 +144,10 @@ public class TrackingActivity extends AppCompatActivity {
 
         AppConfig.saveLoginStatus(this, AppConfig.LOGOUT);
         AppConfig.storeAccount(this, "", "");
+
+        Intent service = new Intent(this, ReportingService3.class);
+        service.putExtra(getString(R.string.service_intent_switch), AppConfig.LOGOUT);
+        startService(service);
 
         Intent intent = new Intent(this, Main2Activity.class);
         startActivity(intent);
