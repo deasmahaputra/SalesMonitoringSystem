@@ -230,6 +230,7 @@ public class ReportingService extends Service{
             Log.i(TAG, "stopTracking");
             handler.removeCallbacks(location_updater);
             isLoggedIn = false;
+            sendUpdateLocation(isLoggedIn, lastKnown);
 //            location_updater.run();
         }
     }
@@ -243,83 +244,92 @@ public class ReportingService extends Service{
         return mLocationRequest;
     }
 
+    Location lastKnown;
     private void sendUpdateLocation(boolean isUpdate, Location location) {
-        Log.i(TAG, "onLocationChanged "+location.getLatitude()+","+location.getLongitude());
-
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-        String street = "Unknown";
         try {
-            addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-            if (addresses != null) {
-                String address = addresses.get(0).getAddressLine(0);
-                String city = addresses.get(0).getLocality();
-                String state = addresses.get(0).getAdminArea();
-                String country = addresses.get(0).getCountryName();
-                String postalCode = addresses.get(0).getPostalCode();
-                String knowName = addresses.get(0).getFeatureName();
-                street = address + " " + city + " " + state + " " + country + " " + postalCode + " " + knowName;
-                Log.i(TAG, "street "+street);
+            Log.i(TAG, "onLocationChanged " + location.getLatitude() + "," + location.getLongitude());
+
+            lastKnown = location;
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(this, Locale.getDefault());
+            String street = "Unknown";
+            try {
+                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                if (addresses != null) {
+                    String address = addresses.get(0).getAddressLine(0);
+                    String city = addresses.get(0).getLocality();
+                    String state = addresses.get(0).getAdminArea();
+                    String country = addresses.get(0).getCountryName();
+                    String postalCode = addresses.get(0).getPostalCode();
+                    String knowName = addresses.get(0).getFeatureName();
+                    street = address + " " + city + " " + state + " " + country + " " + postalCode + " " + knowName;
+                    Log.i(TAG, "street " + street);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                realm.beginTransaction();
+                realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                        .setMessage(e.getMessage()));
+                realm.commitTransaction();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (isUpdate)
+                NetHelper.report(this, AppConfig.getUserName(this), location.getLatitude(),
+                        location.getLongitude(), street, new PostWebTask.HttpConnectionEvent() {
+                            @Override
+                            public void preEvent() {
+
+                            }
+
+                            @Override
+                            public void postEvent(String... result) {
+                                try {
+                                    int nextUpdate = NetHelper.getNextUpdateSchedule(result[0]); // in second
+                                    Log.i(TAG, "next is in " + nextUpdate + " seconds");
+                                    if (nextUpdate > 60) {
+                                        dismissNotification();
+                                        isRunning = false;
+                                    } else if (!isRunning) {
+                                        showNotification();
+                                        isRunning = true;
+                                    }
+                                    handler.postDelayed(location_updater, nextUpdate * 1000 /*millisecond*/);
+                                } catch (JSONException e) {
+                                    Log.i(TAG, "postEvent error update");
+                                    e.printStackTrace();
+                                    realm.beginTransaction();
+                                    realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                                            .setMessage(e.getMessage()));
+                                    realm.commitTransaction();
+                                    handler.postDelayed(location_updater, getResources().getInteger(R.integer.INTERVAL) * 1000 /*millisecond*/);
+                                }
+                            }
+                        });
+            else
+                NetHelper.logout(this, AppConfig.getUserName(this), location.getLatitude(),
+                        location.getLongitude(), street, new PostWebTask.HttpConnectionEvent() {
+                            @Override
+                            public void preEvent() {
+
+                            }
+
+                            @Override
+                            public void postEvent(String... result) {
+                                Log.i(TAG, "postEvent logout " + result);
+                            }
+                        });
+
+            Intent broadcastIntent = new Intent("com.buahbatu.toyotasalesman.MainActivity");
+            broadcastIntent.putExtra(getString(R.string.api_alamat), street);
+            broadcastIntent.putExtra(getString(R.string.api_location),
+                    location.getLatitude() + "," + location.getLongitude());
+            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+            Log.i(TAG, "send broadcast: ");
+        }catch (Exception e){
             realm.beginTransaction();
             realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                     .setMessage(e.getMessage()));
             realm.commitTransaction();
         }
-        if (isUpdate)
-            NetHelper.report(this, AppConfig.getUserName(this), location.getLatitude(),
-                    location.getLongitude(), street, new PostWebTask.HttpConnectionEvent() {
-                @Override
-                public void preEvent() {
-
-                }
-
-                @Override
-                public void postEvent(String... result) {
-                    try {
-                        int nextUpdate = NetHelper.getNextUpdateSchedule(result[0]); // in second
-                        Log.i(TAG, "next is in " + nextUpdate + " seconds");
-                        if (nextUpdate > 60) {
-                            dismissNotification();
-                            isRunning = false;
-                        } else if (!isRunning){
-                            showNotification();
-                            isRunning = true;
-                        }
-                        handler.postDelayed(location_updater, nextUpdate * 1000 /*millisecond*/);
-                    }catch (JSONException e){
-                        Log.i(TAG, "postEvent error update");
-                        e.printStackTrace();
-                        realm.beginTransaction();
-                        realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
-                                .setMessage(e.getMessage()));
-                        realm.commitTransaction();
-                        handler.postDelayed(location_updater, getResources().getInteger(R.integer.INTERVAL) * 1000 /*millisecond*/);
-                    }
-                }
-            });
-        else
-            NetHelper.logout(this, AppConfig.getUserName(this), location.getLatitude(),
-                    location.getLongitude(), street, new PostWebTask.HttpConnectionEvent() {
-                @Override
-                public void preEvent() {
-
-                }
-
-                @Override
-                public void postEvent(String... result) {
-                    Log.i(TAG, "postEvent logout "+result);
-                }
-            });
-
-        Intent broadcastIntent = new Intent("com.buahbatu.toyotasalesman.MainActivity");
-        broadcastIntent.putExtra(getString(R.string.api_alamat), street);
-        broadcastIntent.putExtra(getString(R.string.api_location),
-                location.getLatitude()+","+location.getLongitude());
-        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
-        Log.i(TAG, "send broadcast: ");
     }
 }
