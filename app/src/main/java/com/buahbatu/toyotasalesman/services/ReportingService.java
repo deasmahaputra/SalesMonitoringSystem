@@ -231,7 +231,6 @@ public class ReportingService extends Service{
             handler.removeCallbacks(location_updater);
             isLoggedIn = false;
             sendUpdateLocation(isLoggedIn, lastKnown);
-//            location_updater.run();
         }
     }
 
@@ -305,24 +304,11 @@ public class ReportingService extends Service{
                                 }
                             }
                         });
-            else
-                NetHelper.logout(this, AppConfig.getUserName(this), location.getLatitude(),
-                        location.getLongitude(), street, new PostWebTask.HttpConnectionEvent() {
-                            @Override
-                            public void preEvent() {
-
-                            }
-
-                            @Override
-                            public void postEvent(String... result) {
-                                Log.i(TAG, "postEvent logout " + result);
-                            }
-                        });
 
             Intent broadcastIntent = new Intent("com.buahbatu.toyotasalesman.MainActivity");
             broadcastIntent.putExtra(getString(R.string.api_alamat), street);
-            broadcastIntent.putExtra(getString(R.string.api_location),
-                    location.getLatitude() + "," + location.getLongitude());
+            broadcastIntent.putExtra("lat", location.getLatitude());
+            broadcastIntent.putExtra("long", location.getLongitude());
             LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
             Log.i(TAG, "send broadcast: ");
         }catch (Exception e){

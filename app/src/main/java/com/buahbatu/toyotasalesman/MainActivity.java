@@ -90,14 +90,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     LocalBroadcastManager broadcastManager;
+    String street;
+    double lat, longi;
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "onReceive: BROADCAST");
-            String address = intent.getStringExtra(getString(R.string.api_alamat));
-            String coordinate = intent.getStringExtra(getString(R.string.api_location));
-            mCoorText.setText(coordinate);
-            mLocationText.setText(address);
+            street = intent.getStringExtra(getString(R.string.api_alamat));
+            lat = intent.getDoubleExtra("lat",0);
+            longi = intent.getDoubleExtra("long",0);
+            mCoorText.setText(lat+","+longi);
+            mLocationText.setText(street);
         }
     };
     IntentFilter intentFilter = new IntentFilter("com.buahbatu.toyotasalesman.MainActivity");
@@ -220,6 +223,19 @@ public class MainActivity extends AppCompatActivity {
 
         // stop tracking
         startTrack(false);
+
+        NetHelper.logout(this, AppConfig.getUserName(this), lat,
+                longi, street, new PostWebTask.HttpConnectionEvent() {
+                    @Override
+                    public void preEvent() {
+
+                    }
+
+                    @Override
+                    public void postEvent(String... result) {
+                        Log.i(TAG, "postEvent logout " + result[0]);
+                    }
+                });
     }
 
     void doLogin(){
@@ -360,44 +376,4 @@ public class MainActivity extends AppCompatActivity {
             default: Toast.makeText(this, "Please give permissions", Toast.LENGTH_SHORT).show(); break;
         }
     }
-
-//      Location location = null;
-//    LocationManager locationManager = (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
-//        boolean netEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-//        if(netEnabled){
-//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-//          location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//        }if(location != null){
-//            lati
-        //}
-//        LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-//        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        double latitude = location.getLatitude();
-//        double longtitude = location.getLongitude();
-//    private final LocationListener locationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(Location location) {
-//            latitude = location.getLatitude();
-//            longtitude = location.getLongitude();
-//        }
-//
-//
-//        @Override
-//        public void onStatusChanged(String s, int i, Bundle bundle) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String s) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String s) {
-//
-//        }
-//
-//
-//    };
-
 }
