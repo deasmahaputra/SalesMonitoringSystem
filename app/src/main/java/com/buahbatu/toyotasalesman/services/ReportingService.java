@@ -16,9 +16,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.buahbatu.toyotasalesman.AppConfig;
+import com.buahbatu.toyotasalesman.ErrorLog;
 import com.buahbatu.toyotasalesman.MainActivity;
 import com.buahbatu.toyotasalesman.R;
 import com.buahbatu.toyotasalesman.network.NetHelper;
@@ -36,8 +38,11 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import io.realm.Realm;
 
 /**
  * The background service
@@ -51,6 +56,7 @@ public class ReportingService extends Service{
     LocationRequest mLocationRequest;
     boolean isLoggedIn;
 
+    Realm realm;
     boolean isRunning = false;
     Handler handler;
     Runnable location_updater = new Runnable() {
@@ -76,6 +82,7 @@ public class ReportingService extends Service{
         super.onCreate();
         handler = new Handler();
         mLocationRequest = createLocationRequest();
+        realm = Realm.getDefaultInstance();
     }
 
     @Override
@@ -131,9 +138,17 @@ public class ReportingService extends Service{
                                                 status.startResolutionForResult(activity, MainActivity.requestPhonePermission);
                                             } catch (IntentSender.SendIntentException e) {
                                                 // Ignore the error.
+                                                realm.beginTransaction();
+                                                realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                                                        .setMessage(e.getMessage()));
+                                                realm.commitTransaction();
                                             } catch (Exception e) {
                                                 Log.e(TAG, "onResult ERROR");
                                                 e.printStackTrace();
+                                                realm.beginTransaction();
+                                                realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                                                        .setMessage(e.getMessage()));
+                                                realm.commitTransaction();
                                             }
                                             break;
                                         case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -178,6 +193,10 @@ public class ReportingService extends Service{
             stopForeground(true);
         }catch (Exception e){
             e.printStackTrace();
+            realm.beginTransaction();
+            realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                    .setMessage(e.getMessage()));
+            realm.commitTransaction();
         }
         return false;
     }
@@ -211,7 +230,7 @@ public class ReportingService extends Service{
             Log.i(TAG, "stopTracking");
             handler.removeCallbacks(location_updater);
             isLoggedIn = false;
-            location_updater.run();
+//            location_updater.run();
         }
     }
 
@@ -225,7 +244,7 @@ public class ReportingService extends Service{
     }
 
     private void sendUpdateLocation(boolean isUpdate, Location location) {
-        Log.i(TAG, "onLocationChanged "+location.getLongitude());
+        Log.i(TAG, "onLocationChanged "+location.getLatitude()+","+location.getLongitude());
 
         Geocoder geocoder;
         List<Address> addresses;
@@ -245,6 +264,10 @@ public class ReportingService extends Service{
             }
         } catch (IOException e) {
             e.printStackTrace();
+            realm.beginTransaction();
+            realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                    .setMessage(e.getMessage()));
+            realm.commitTransaction();
         }
         if (isUpdate)
             NetHelper.report(this, AppConfig.getUserName(this), location.getLatitude(),
@@ -270,6 +293,10 @@ public class ReportingService extends Service{
                     }catch (JSONException e){
                         Log.i(TAG, "postEvent error update");
                         e.printStackTrace();
+                        realm.beginTransaction();
+                        realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                                .setMessage(e.getMessage()));
+                        realm.commitTransaction();
                         handler.postDelayed(location_updater, getResources().getInteger(R.integer.INTERVAL) * 1000 /*millisecond*/);
                     }
                 }
@@ -287,5 +314,12 @@ public class ReportingService extends Service{
                     Log.i(TAG, "postEvent logout "+result);
                 }
             });
+
+        Intent broadcastIntent = new Intent("com.buahbatu.toyotasalesman.MainActivity");
+        broadcastIntent.putExtra(getString(R.string.api_alamat), street);
+        broadcastIntent.putExtra(getString(R.string.api_location),
+                location.getLatitude()+","+location.getLongitude());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+        Log.i(TAG, "send broadcast: ");
     }
 }

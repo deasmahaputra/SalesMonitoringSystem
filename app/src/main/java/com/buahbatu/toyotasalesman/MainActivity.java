@@ -2,20 +2,19 @@ package com.buahbatu.toyotasalesman;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -51,9 +50,20 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.username_text)EditText userText;
     @BindView(R.id.pass_text)EditText passText;
-    @BindView(R.id.textInfo)TextView info;
+//    @BindView(R.id.textInfo)TextView info;
+
+    @BindView(R.id.my_location) TextView mLocationText;
+    @BindView(R.id.my_coordinate) TextView mCoorText;
+
+    @BindView(R.id.info_box) View mInfoBox;
+    @BindView(R.id.login_box) View mLoginBox;
 
     @BindView(R.id.login_button) Button loginButton;
+    @BindView(R.id.logout_button) Button logoutButton;
+
+    @OnClick(R.id.logout_button)void onLogoutClick(Button button){
+        doLogout();
+    }
     @OnClick(R.id.login_button)void onLoginClick(Button button){
         if (checkForPermission()) {
             switch (button.getText().toString()) {
@@ -79,10 +89,23 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    LocalBroadcastManager broadcastManager;
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive: BROADCAST");
+            String address = intent.getStringExtra(getString(R.string.api_alamat));
+            String coordinate = intent.getStringExtra(getString(R.string.api_location));
+            mCoorText.setText(coordinate);
+            mLocationText.setText(address);
+        }
+    };
+    IntentFilter intentFilter = new IntentFilter("com.buahbatu.toyotasalesman.MainActivity");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
 
         ButterKnife.bind(this);
 
@@ -93,8 +116,12 @@ public class MainActivity extends AppCompatActivity {
         startTrack(AppConfig.getLoginStatus(context));
 
         //isnetworkAvailable();
-        updateWithNewLocation();
+//        updateWithNewLocation();
 
+        loginButton.setActivated(false);
+        logoutButton.setActivated(true);
+
+        broadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
 //    private boolean isnetworkAvailable(){
@@ -158,12 +185,14 @@ public class MainActivity extends AppCompatActivity {
         Intent intent= new Intent(this, ReportingService.class);
         bindService(intent, mConnection,
                 Context.BIND_AUTO_CREATE);
+        broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unbindService(mConnection);
+        broadcastManager.unregisterReceiver(broadcastReceiver);
     }
 
     boolean checkForPermission(){
@@ -299,16 +328,12 @@ public class MainActivity extends AppCompatActivity {
 
     // update UI
     void setUI(boolean isLoogedIn){
-        if (isLoogedIn) {
-            userText.setVisibility(View.GONE);
-            passText.setVisibility(View.GONE);
-            //loginButton.setText(R.string.logout);
-            loginButton.setVisibility(View.GONE);
+        if (isLoogedIn){
+            mLoginBox.setVisibility(View.GONE);
+            mInfoBox.setVisibility(View.VISIBLE);
         }else {
-            userText.setVisibility(View.VISIBLE);
-            passText.setVisibility(View.VISIBLE);
-            loginButton.setVisibility(View.VISIBLE);
-            loginButton.setText(R.string.login);
+            mLoginBox.setVisibility(View.VISIBLE);
+            mInfoBox.setVisibility(View.GONE);
         }
     }
 
@@ -374,49 +399,5 @@ public class MainActivity extends AppCompatActivity {
 //
 //
 //    };
-
-    public void updateWithNewLocation(){
-
-        String permission = "ACCESS_FINE_LOCATION";
-        int res = context.checkCallingOrSelfPermission(permission);
-        if(res == PackageManager.PERMISSION_GRANTED){
-            LocationManager locationManager;
-            locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-
-        String latLongString = "Unknown";
-        String addressString = "No address found";
-        //TextView textInfo;
-        DecimalFormat df = new DecimalFormat("##.00");
-        //textInfo = (TextView)findViewById(R.id.textInfo);
-            //info.setText("Connect");
-        if (location != null) {
-            double lat = location.getLatitude();
-            double lng = location.getLongitude();
-            latLongString = "Lat:" +  df.format(lat) + "\nLong:" +  df.format(lng);
-            Geocoder gc = new Geocoder(MainActivity.this, Locale.getDefault());
-            try {
-                List<Address> addresses  = gc.getFromLocation(lat, lng, 1);
-                if (addresses.size() == 1) {
-                    addressString="";
-                    Address address = addresses.get(0);
-                    addressString = addressString + address.getAddressLine(0) + "\n";
-                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++){
-                        addressString = addressString + address.getAddressLine(i) + "\n";
-                    }
-                    addressString = addressString + address.getLocality()+ "\n";
-                    addressString = addressString + address.getPostalCode()+ "\n";
-                    addressString = addressString + address.getCountryName()+ "\n";
-                }
-            } catch (IOException ioe) {
-                Log.e("Geocoder IOException", ioe.getMessage());
-            }
-        }
-            String tampung = "Your Current Position is:\n" + latLongString + "\n" + addressString;
-            Log.w("tampung" , tampung);
-       info.setText("Your Current Position is:\n" + latLongString + "\n" + addressString);
-        }
-    }
 
 }

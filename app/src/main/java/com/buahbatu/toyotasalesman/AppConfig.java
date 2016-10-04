@@ -13,7 +13,8 @@ import android.util.Log;
  * This is for configuration in app
  */
 public class AppConfig {
-    public final static int REQUEST_PHONE_PERMISSION = 0;
+    public final static int NOTIFICATION = 11;
+    public final static int REQUEST_PHONE_PERMISSION = 16;
 
     public static boolean LOGIN = true;
     public static boolean LOGOUT = false;
@@ -63,6 +64,7 @@ public class AppConfig {
     public static boolean checkForPermission(Context context){
         return context.checkCallingOrSelfPermission("android.permission.READ_PHONE_STATE") == PackageManager.PERMISSION_GRANTED
                 && context.checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
+                && context.checkCallingOrSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_GRANTED
                 && context.checkCallingOrSelfPermission("android.permission.ACCESS_NETWORK_STATE") == PackageManager.PERMISSION_GRANTED
                 && context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
                 && context.checkCallingOrSelfPermission("android.permission.INTERNET") == PackageManager.PERMISSION_GRANTED;

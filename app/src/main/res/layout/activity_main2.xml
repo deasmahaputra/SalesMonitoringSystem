@@ -5,23 +5,68 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" android:orientation="vertical"
-    android:background="@drawable/bg">
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:background="@drawable/bg_blue">
     <ImageView
         android:id="@+id/logo_view"
         android:contentDescription="@string/logo_description"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:paddingTop="40dp"
+        android:paddingBottom="40dp"
+        android:layout_height="wrap_content"
         android:src="@drawable/autoo" />
     <LinearLayout
+        android:id="@+id/info_box"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:background="@drawable/round_white_back"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@string/my_location"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/my_location"
+                android:text="@string/loading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/my_coordinate"
+                android:text="@string/loading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/logout_button"
+            android:layout_marginTop="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/button_pressed_selector"
+            android:text="@string/logout"
+
+            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+            android:textColor="@color/White"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/login_box"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.80"
+        android:layout_weight="1"
         android:weightSum="2"
         android:gravity="bottom"
         android:orientation="vertical">
-
         <EditText
             android:id="@+id/username_text"
             android:imeOptions="actionNext"
@@ -53,7 +98,7 @@
             android:layout_marginTop="10dp"
             android:layout_width="fill_parent"
             android:layout_height="60dp"
-            android:background="@color/grey"
+            android:background="@drawable/button_pressed_selector"
             android:text="@string/login"
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             android:textColor="@color/White"/>

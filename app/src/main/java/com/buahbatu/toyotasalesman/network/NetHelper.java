@@ -112,11 +112,12 @@ public class NetHelper {
     public static String getLoginResponse(String result) throws JSONException{
         JSONArray object = new JSONArray(result);
         return object.get(0).toString();
-        // return "user";
     }
 
     public static int getNextUpdateSchedule(String result) throws JSONException{
+        Log.i("ReportingService3", "getNextUpdateSchedule beff: "+result);
         JSONObject object = new JSONObject(result);
+        Log.i("ReportingService3", "getNextUpdateSchedule aff: "+result);
         switch (object.getString("status")){
             case "success": return 60;
             case "failed": return object.getInt("next");

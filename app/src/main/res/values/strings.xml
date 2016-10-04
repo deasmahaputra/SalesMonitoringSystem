@@ -11,6 +11,7 @@
     <string name="login">Login</string>
     <string name="login_process">Login &#8230;</string>
     <string name="logout">Logout</string>
+    <string name="logout_process">Logout &#8230;</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="location">Coordinate</string>
     <string name="latitude">LAT</string>
@@ -29,6 +30,7 @@
 
     <!--MAP ACTIVITY-->
     <string name="my_location">Saya berada di</string>
+    <string name="loading">Loading</string>
     <string name="service_intent_switch">service</string>
 
 </resources>
