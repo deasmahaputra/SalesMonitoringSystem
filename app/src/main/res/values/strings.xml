@@ -33,4 +33,7 @@
     <string name="loading">Loading</string>
     <string name="service_intent_switch">service</string>
 
+    <string name="error_detected">Please re-login auto 2000</string>
+    <string name="error_detected2">Please download newest version auto 2000</string>
+
 </resources>

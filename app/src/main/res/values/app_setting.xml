@@ -7,7 +7,8 @@
 
     <!--Domain Setting-->
     <!--<string name="default_domain">monitor.auto2000.link/Auto2000_mobile/</string>-->
-    <string name="default_domain">toyotarev.gigit.my.id/Auto2000_mobile/</string>
+    <!--<string name="default_domain">toyotarev.gigit.my.id/Auto2000_mobile/</string>-->
+    <string name="default_domain">auto2000-dki2.com/Auto2000_mobile/</string>
     <string name="default_protocol">http://</string>
     <string name="login_url">/Login_mobile</string>
     <string name="logout_url">/Logout</string>

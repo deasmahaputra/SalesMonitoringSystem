@@ -35,12 +35,14 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "Main2Activity";
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     IntentFilter intentFilter = new IntentFilter("com.buahbatu.toyotasalesman.MainActivity");
+    Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
         // enable auto login
         setUI(AppConfig.getLoginStatus(context));
         startTrack(AppConfig.getLoginStatus(context));
+
+        realm = Realm.getDefaultInstance();
 
         //isnetworkAvailable();
 //        updateWithNewLocation();
@@ -301,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
                                 }).show();
                         break;
                     case "imei":
-                        builder.setMessage("Your phone is not registered")
+                        builder.setMessage("Your phoncatche is not registered")
                                 .setPositiveButton("Ok got it!", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -338,6 +343,11 @@ public class MainActivity extends AppCompatActivity {
                                 dialog.dismiss();
                             }
                         }).show();
+                realm.beginTransaction();
+                realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
+                        .setMessage(e.getMessage()));
+                realm.commitTransaction();
+
             }
         }
     };

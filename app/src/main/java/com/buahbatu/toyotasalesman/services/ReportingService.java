@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.buahbatu.toyotasalesman.AppConfig;
 import com.buahbatu.toyotasalesman.ErrorLog;
@@ -142,6 +143,7 @@ public class ReportingService extends Service{
                                                 realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                                                         .setMessage(e.getMessage()));
                                                 realm.commitTransaction();
+                                                Toast.makeText(activity, getString(R.string.error_detected), Toast.LENGTH_SHORT).show();
                                             } catch (Exception e) {
                                                 Log.e(TAG, "onResult ERROR");
                                                 e.printStackTrace();
@@ -149,6 +151,7 @@ public class ReportingService extends Service{
                                                 realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                                                         .setMessage(e.getMessage()));
                                                 realm.commitTransaction();
+                                                Toast.makeText(activity, getString(R.string.error_detected), Toast.LENGTH_SHORT).show();
                                             }
                                             break;
                                         case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -197,6 +200,7 @@ public class ReportingService extends Service{
             realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                     .setMessage(e.getMessage()));
             realm.commitTransaction();
+            Toast.makeText(this, getString(R.string.error_detected), Toast.LENGTH_SHORT).show();
         }
         return false;
     }
@@ -271,6 +275,7 @@ public class ReportingService extends Service{
                 realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                         .setMessage(e.getMessage()));
                 realm.commitTransaction();
+                Toast.makeText(this, getString(R.string.error_detected), Toast.LENGTH_SHORT).show();
             }
             if (isUpdate)
                 NetHelper.report(this, AppConfig.getUserName(this), location.getLatitude(),
@@ -316,6 +321,7 @@ public class ReportingService extends Service{
             realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                     .setMessage(e.getMessage()));
             realm.commitTransaction();
+            Toast.makeText(this, getString(R.string.error_detected), Toast.LENGTH_SHORT).show();
         }
     }
 }

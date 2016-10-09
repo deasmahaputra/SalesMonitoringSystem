@@ -3,6 +3,7 @@ package com.buahbatu.toyotasalesman.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.buahbatu.toyotasalesman.AppConfig;
 import com.buahbatu.toyotasalesman.R;
@@ -65,6 +66,7 @@ public class NetHelper {
         }catch (MalformedURLException e){
             e.printStackTrace();
             Log.i(TAG, "Error domain");
+            Toast.makeText(context, context.getString(R.string.error_detected2), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -86,6 +88,7 @@ public class NetHelper {
         }catch (MalformedURLException e){
             e.printStackTrace();
             Log.i(TAG, "Error domain");
+            Toast.makeText(context, context.getString(R.string.error_detected2), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -106,6 +109,7 @@ public class NetHelper {
         }catch (MalformedURLException e){
             e.printStackTrace();
             Log.i(TAG, "Error domain");
+            Toast.makeText(context, context.getString(R.string.error_detected2), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -115,9 +119,9 @@ public class NetHelper {
     }
 
     public static int getNextUpdateSchedule(String result) throws JSONException{
-        Log.i("ReportingService3", "getNextUpdateSchedule beff: "+result);
+        Log.i(TAG, "getNextUpdateSchedule beff: "+result);
         JSONObject object = new JSONObject(result);
-        Log.i("ReportingService3", "getNextUpdateSchedule aff: "+result);
+        Log.i(TAG, "getNextUpdateSchedule aff: "+result);
         switch (object.getString("status")){
             case "success": return 60;
             case "failed": return object.getInt("next");
