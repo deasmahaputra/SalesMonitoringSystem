@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.buahbatu.toyotasalesman">
+    package="com.bionus.auto2000salesman">
 
     <!-- Internet Permission -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!--LOAD MAP-->
-    <permission android:name="com.buahbatu.toyotasalesman.TrackingActivity.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
+    <permission android:name="com.bionus.auto2000salesman.TrackingActivity.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature
@@ -23,7 +23,7 @@
         android:required="true"/>
 
     <application
-        android:name=".MyApplication"
+        android:name="com.bionus.auto2000salesman.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -36,26 +36,26 @@
             android:value="AIzaSyCS8Za5B-OzQh1Yj6ROSzrs0vlrWYj8A5w"/>
             <!--android:value="AIzaSyDX7Vcg_tm5w0zCdeiJfTRufghuz3ftVSQ" />-->
         <service
-            android:name=".services.ReportingService3"
+            android:name="com.bionus.auto2000salesman.services.ReportingService3"
             android:icon="@mipmap/ic_launcher"
             android:exported="false"
             android:label="@string/service_name">
         </service>
         <service
-            android:name=".services.ReportingService"
+            android:name="com.bionus.auto2000salesman.services.ReportingService"
             android:exported="false" />
         <service
-            android:name=".services.TesService"
+            android:name="com.bionus.auto2000salesman.services.TesService"
             android:exported="false" />
 
-        <receiver android:name=".services.AutoStart">
+        <receiver android:name="com.bionus.auto2000salesman.services.AutoStart">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.bionus.auto2000salesman.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,11 +63,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Main2Activity"
+        <activity android:name="com.bionus.auto2000salesman.Main2Activity"
             android:label="@string/app_name">
 
         </activity>
-        <activity android:name=".TrackingActivity"/>
+        <activity android:name="com.bionus.auto2000salesman.TrackingActivity"/>
     </application>
 
 </manifest>
