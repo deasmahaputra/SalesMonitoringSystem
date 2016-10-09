@@ -306,6 +306,7 @@ public class ReportingService extends Service{
                                             .setMessage(e.getMessage()));
                                     realm.commitTransaction();
                                     handler.postDelayed(location_updater, getResources().getInteger(R.integer.INTERVAL) * 1000 /*millisecond*/);
+                                    Toast.makeText(ReportingService.this, getString(R.string.error_detected3), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

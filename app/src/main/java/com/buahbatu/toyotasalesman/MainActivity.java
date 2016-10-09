@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
                 realm.copyToRealm(new ErrorLog().setDate(Calendar.getInstance().getTime().toString())
                         .setMessage(e.getMessage()));
                 realm.commitTransaction();
-
+                Toast.makeText(reportingService, getString(R.string.error_detected3), Toast.LENGTH_SHORT).show();
             }
         }
     };

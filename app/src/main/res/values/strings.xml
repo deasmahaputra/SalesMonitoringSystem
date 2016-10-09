@@ -35,5 +35,6 @@
 
     <string name="error_detected">Please re-login auto 2000</string>
     <string name="error_detected2">Please download newest version auto 2000</string>
+    <string name="error_detected3">Problem connection in server</string>
 
 </resources>
