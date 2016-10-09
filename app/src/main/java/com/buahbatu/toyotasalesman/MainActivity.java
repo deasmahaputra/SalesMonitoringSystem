@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     LocalBroadcastManager broadcastManager;
-    String street;
+    String street = "unknown";
     double lat, longi;
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
